@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking Application</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Banking Application</h1>
+    </header>
+    <main>
+        <section id="add-user">
+            <h2>Add User</h2>
+            <form id="addUserForm">
+                <label for="userName">User Name:</label>
+                <input type="text" id="userName" name="userName" pattern="[A-Za-z\s]+" title="Name should only contain letters and spaces" required><br><br>
+    
+                <label for="accounts">Account:</label>
+                <input type="text" id="accounts" name="accounts" pattern="[A-Za-z0-9,\s]+" title="Account number should be alphanumeric" required><br><br>
+    
+                <label for="balance">Balance:</label>
+                <input type="text" id="balance" name="balance " pattern="[0-9.,\s]+" title="Balance should only contain integer and decimal values" required><br><br>
+    
+                <button type="submit">Add User</button>
+            </form>
+        </section>
+    
+        <script>
+            document.getElementById('addUserForm').addEventListener('submit', function(event) {
+           event.preventDefault();
+        
+           const userName = document.getElementById('userName').value;
+           const accountsInput = document.getElementById('accounts').value;
+           const balanceInput = document.getElementById('balance').value;
+        
+           const accounts = [accountsInput];
+           const accountBalances = { [accountsInput]: parseFloat(balanceInput) };
+        
+           // Fetch existing users to check for duplicate accounts
+           fetch('https://localhost:8443/users')
+               .then(response => response.json())
+               .then(users => {
+                   const accountExists = users.some(user => 
+                       user.accounts && user.accounts.includes(accountsInput)
+                   );
+        
+                   if (accountExists) {
+                       alert('Error: Account number already exists for another user.');
+                   } else {
+                       const user = {
+                           name: userName,
+                           accounts: accounts,
+                           accountBalances: accountBalances
+                       };
+        
+                       fetch('https://localhost:8443/users', {
+                           method: 'POST',
+                           headers: {
+                               'Content-Type': 'application/json'
+                           },
+                           body: JSON.stringify(user)
+                       })
+                       .then(response => response.json())
+                       .then(data => {
+                           const usersList = document.getElementById('usersList');
+                           const userCard = document.createElement('div');
+                           userCard.classList.add('user-card');
+                           userCard.innerHTML = `
+                               <p><strong>ID:</strong> ${data.id}</p>
+                               <p><strong>Name:</strong> ${data.name}</p>
+                               <p><strong>Accounts:</strong></p>
+                               <ul>
+                                   ${data.accounts ? data.accounts.map(account => `<li>${account}: ${data.accountBalances[account]}</li>`).join('') : ''}
+                               </ul>
+                           `;
+                           usersList.appendChild(userCard);
+                           alert('User added with id: ' + JSON.stringify(data.id));
+                       })
+                       .catch(error => {
+                           alert('Error adding user: ' + error.message);
+                       });
+                   }
+               })
+               .catch(error => {
+                   alert('Error fetching users: ' + error.message);
+               });
+        });
+        </script>
+
+    
+
+        
+
+        
+    
+    
+    
+    
+
+        <section id="transfer-money">
+            <h2>Transfer Money</h2>
+            <form id="transferForm">
+                <label for="fromAccount">From Account Number:</label>
+                <input type="text" id="fromAccount" name="fromAccount" required><br><br>
+
+                <label for="toAccount">To Account Number:</label>
+                <input type="text" id="toAccount" name="toAccount" required><br><br>
+
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" name="amount" step="0.01" required><br><br>
+
+                <button type="submit">Transfer</button>
+            </form>
+        </section>
+        <br>
+
+        <section id="getUserById">
+            <h2>Get User By ID</h2>
+            <input type="number" id="userIdInput" placeholder="Enter User ID">
+            <button id="viewUserButton">Get User</button>
+        </section>
+    
+        <div id="usersList"></div>
+
+        
+
+        
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

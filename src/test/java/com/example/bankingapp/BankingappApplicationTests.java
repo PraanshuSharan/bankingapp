@@ -1,0 +1,15 @@
+package com.example.bankingapp;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest
+class BankingappApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
